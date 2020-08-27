@@ -75,7 +75,10 @@ class UniqueRegistrationSerializerMixin(Serializer):
             if user is not None and is_user_authenticated(user):
                 devices = Device.objects.filter(
                     registration_id=attrs["registration_id"])
-                devices.filter(~Q(user=user)).update(active=False)
+                if SETTINGS['USER_DEVICE_FORCE_REGISTER']:
+                    devices.update(active=False)
+                else:
+                    devices.filter(~Q(user=user)).update(active=False)
                 devices = devices.filter(user=user, active=True)
             else:
                 devices = Device.objects.filter(
